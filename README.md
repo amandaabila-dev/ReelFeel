@@ -1,2 +1,2 @@
 # ReelFeel
-Projeto de Imersão Front-End Alura, Mar 26
+Projeto de Imersão Front-End + IA Alura, Mar 26
