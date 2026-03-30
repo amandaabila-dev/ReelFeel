@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ReelFeel - Descubra filmes baseados no seu mood. Avalie, colecione badges e construa sua identidade cinematográfica.">
+    <meta name="theme-color" content="#FF6B6B">
+    <meta property="og:title" content="ReelFeel - Descubra Filmes por Mood">
+    <meta property="og:description" content="Descubra filmes curados por mood, gênero e estilo. Avalie, resenhe e construa sua identidade cinematográfica.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://via.placeholder.com/1200x630/FF6B6B/FFFFFF?text=🎬+ReelFeel">
+    <title>ReelFeel - Descubra Filmes por Mood</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+    <link rel="preconnect" href="https://image.tmdb.org">
+    <link rel="preconnect" href="https://img.youtube.com">
+    <link rel="preconnect" href="https://www.youtube.com">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a href="#app" class="skip-link">Pular para conteúdo principal</a>
+    <header>
+        <div class="header-content">
+            <button class="logo" onclick="goToHome()" aria-label="Ir para página inicial">
+                <span>ReelFeel</span>
+            </button>
+            
+            <div class="search-container hidden" id="search-container">
+                <input type="search" 
+                       id="search-input" 
+                       class="search-input" 
+                       placeholder="Buscar filmes..." 
+                       aria-label="Buscar filmes"
+                       oninput="handleSearch(this.value)">
+                <div class="search-results" id="search-results"></div>
+            </div>
+
+
+            <nav aria-label="Navegação principal" id="main-nav" class="hidden">
+                <a href="#catalog" onclick="showPage('catalog'); return false;" id="nav-catalog">Home</a>
+                <a href="#feed" onclick="showPage('feed'); return false;" id="nav-feed">Feed</a>
+                <a href="#curadoria" onclick="showPage('curadoria'); return false;" id="nav-curadoria">Minha Curadoria</a>
+                <button class="nav-search-btn" onclick="focusSearch()" aria-label="Buscar">🔍</button>
+            </nav>
+
+            <div class="header-actions">
+                <div class="header-profile-btn hidden" id="header-profile-btn" onclick="toggleProfileMenu()" aria-label="Perfil do usuário">
+                    <div class="header-profile-avatar" id="header-profile-avatar"></div>
+                    <span class="header-profile-name" id="header-profile-name">Perfil</span>
+                    <span class="header-profile-xp" id="header-profile-xp"></span>
+                    <span class="header-profile-level" id="header-profile-level"></span>
+                </div>
+                <div class="profile-dropdown hidden" id="profile-dropdown">
+                    <button onclick="switchProfile()">Trocar Perfil</button>
+                    <button onclick="logout()">Sair</button>
+                </div>
+                <button class="btn btn-outline btn-small hidden" id="switch-profile-btn" onclick="switchProfile()">Trocar Perfil</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main id="app">
+
+        <!-- TELA DE INTRO/SPLASH -->
+        <section id="splash-screen" class="splash-screen">
+            <div class="splash-logo-container">
+                <div class="splash-logo">
+                    <span class="splash-logo-icon">🎬</span>
+                    <span class="splash-logo-text">ReelFeel</span>
+                </div>
+                <p class="splash-tagline">Sua comunidade oficial de curadoria de filmes</p>
+                <div class="splash-sound-wave">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- PÁGINA DE SELEÇÃO DE PERFIL -->
+        <section id="profile-select" class="page hidden" aria-labelledby="profile-select-title">
+            <div class="profile-select-container">
+                <h1 id="profile-select-title" class="profile-select-title">Quem está assistindo?</h1>
+                <div class="profiles-grid" id="profiles-grid">
+                    <!-- Perfis serão renderizados via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- PÁGINA CATÁLOGO (Principal após seleção de perfil) -->
+        <section id="catalog" class="page hidden" aria-labelledby="catalog-title">
+            <div id="catalog-content">
+                <!-- Conteúdo gerado dinamicamente pelo JavaScript -->
+            </div>
+        </section>
+
+        <!-- PÁGINA FEED (Comunidade + Resenhas) -->
+        <section id="feed" class="page hidden">
+            
+            <!-- Abas Mobile -->
+            <div class="feed-mobile-tabs">
+                <button class="feed-mobile-tab active" onclick="switchFeedTab('feed')">Feed</button>
+                <button class="feed-mobile-tab" onclick="switchFeedTab('videos')">Resenhas em Vídeo</button>
+            </div>
+            
+            <!-- Layout de duas colunas -->
+            <div class="feed-two-columns">
+                <!-- Coluna Esquerda: Feed -->
+                <div class="feed-column-left active" id="feed-tab-feed">
+                    <div class="section-header">
+                        <h2>Feed</h2>
+                    </div>
+                    
+                    <!-- Formulário de Avaliação -->
+                    <div class="feed-review-form">
+                        <h3>Avaliar um filme</h3>
+                        
+                        <div class="review-form-group">
+                            <label class="review-form-label">Selecione o filme</label>
+                            <button class="review-select-movie" id="feed-select-movie" onclick="openSelectMovieFeed()">
+                                <span class="select-movie-icon">🎬</span>
+                                <span class="select-movie-text" id="feed-movie-text">Clique para selecionar...</span>
+                            </button>
+                        </div>
+                        
+                        <div class="review-form-group">
+                            <label class="review-form-label">Sua avaliação</label>
+                            <div class="review-stars-input" id="feed-stars">
+                                <span class="star-input" data-rating="1" onclick="setFeedRating(1)">☆</span>
+                                <span class="star-input" data-rating="2" onclick="setFeedRating(2)">☆</span>
+                                <span class="star-input" data-rating="3" onclick="setFeedRating(3)">☆</span>
+                                <span class="star-input" data-rating="4" onclick="setFeedRating(4)">☆</span>
+                                <span class="star-input" data-rating="5" onclick="setFeedRating(5)">☆</span>
+                            </div>
+                        </div>
+                        
+                        <div class="review-form-group">
+                            <label class="review-form-label">Seu comentário</label>
+                            <textarea id="feed-review-text" class="review-textarea" placeholder="O que você achou do filme?"></textarea>
+                        </div>
+                        
+                        <div class="review-form-footer">
+                            <div class="review-attachments">
+                                <button class="attachment-btn" onclick="openPhotoUpload()" title="Anexar foto">
+                                    📷
+                                </button>
+                                <button class="attachment-btn" onclick="openVideoUploadModal()" title="Anexar vídeo">
+                                    🎥
+                                </button>
+                            </div>
+                            <button class="review-submit-btn" onclick="submitFeedReview()">Publicar Avaliação</button>
+                        </div>
+                    </div>
+                    
+                    <div class="feed-posts-list" id="feed-posts-grid"></div>
+                </div>
+
+                <!-- Coluna Direita: Resenhas em Vídeo -->
+                <div class="feed-column-right" id="feed-tab-videos">
+                    <div class="section-header">
+                        <h2>Resenhas em Vídeo</h2>
+                        <span class="section-subtitle" id="reviews-count"></span>
+                    </div>
+                    <div class="feed-search-bar">
+                        <div class="feed-search-container">
+                            <input type="text" id="feed-search-input" class="feed-search-input" placeholder="Buscar resenhas..." oninput="searchReviews(this.value)">
+                            <span class="feed-search-icon">🔍</span>
+                        </div>
+                    </div>
+                    <div class="video-reviews-grid" id="all-reviews-grid"></div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- PÁGINA DESCOBRIR -->
+        <section id="discover" class="page hidden" aria-labelledby="discover-title">
+            
+            <!-- Header com animação -->
+            <div class="discover-header">
+                <div class="discover-header-bg"></div>
+                <div class="discover-header-content">
+                    <h1 id="discover-title">Como você está se sentindo?</h1>
+                    <p>Selecione seu mood e deixe a magia acontecer ✨</p>
+                </div>
+            </div>
+
+            <!-- Wizard de Descoberta -->
+            <div class="discover-wizard">
+                
+                <!-- Step 1: Mood -->
+                <div class="discover-step" id="step-mood">
+                    <div class="step-header">
+                        <span class="step-number">1</span>
+                        <h2>Qual é o seu mood agora?</h2>
+                    </div>
+                    <div class="mood-grid">
+                        <button class="mood-card" onclick="selectMood('emotional')" data-mood="emotional">
+                            <span class="mood-emoji">😢</span>
+                            <span class="mood-label">Emotivo</span>
+                            <span class="mood-desc">Quero sentir algo profundo</span>
+                        </button>
+                        <button class="mood-card" onclick="selectMood('excited')" data-mood="excited">
+                            <span class="mood-emoji">🤩</span>
+                            <span class="mood-label">Animado</span>
+                            <span class="mood-desc">Energia alta, ação!</span>
+                        </button>
+                        <button class="mood-card" onclick="selectMood('thoughtful')" data-mood="thoughtful">
+                            <span class="mood-emoji">🤔</span>
+                            <span class="mood-label">Reflexivo</span>
+                            <span class="mood-desc">Algo para pensar</span>
+                        </button>
+                        <button class="mood-card" onclick="selectMood('relaxed')" data-mood="relaxed">
+                            <span class="mood-emoji">😌</span>
+                            <span class="mood-label">Relaxado</span>
+                            <span class="mood-desc">Leve e tranquilo</span>
+                        </button>
+                        <button class="mood-card" onclick="selectMood('romantic')" data-mood="romantic">
+                            <span class="mood-emoji">💕</span>
+                            <span class="mood-label">Romântico</span>
+                            <span class="mood-desc">Amor no ar</span>
+                        </button>
+                        <button class="mood-card" onclick="selectMood('dark')" data-mood="dark">
+                            <span class="mood-emoji">🌑</span>
+                            <span class="mood-label">Sombrio</span>
+                            <span class="mood-desc">Intenso e obscuro</span>
+                        </button>
+                        <button class="mood-card" onclick="selectMood('curious')" data-mood="curious">
+                            <span class="mood-emoji"></span>
+                            <span class="mood-label">Curioso</span>
+                            <span class="mood-desc">Mistérios e suspense</span>
+                        </button>
+                        <button class="mood-card" onclick="selectMood('nostalgic')" data-mood="nostalgic">
+                            <span class="mood-emoji">📼</span>
+                            <span class="mood-label">Nostálgico</span>
+                            <span class="mood-desc">Viagem ao passado</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Preferências -->
+                <div class="discover-step" id="step-prefs">
+                    <div class="step-header">
+                        <span class="step-number">2</span>
+                        <h2>Refine suas preferências</h2>
+                        <p class="step-subtitle">Opcional - pule se quiser</p>
+                    </div>
+                    
+                    <div class="prefs-row">
+                        <div class="pref-group">
+                            <h3>Gêneros</h3>
+                            <div class="filter-chips" id="genre-chips">
+                                <button class="filter-chip" onclick="toggleChip(this, 'genre', 'Drama')">Drama</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'genre', 'Romance')">Romance</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'genre', 'Thriller')">Thriller</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'genre', 'Comedy')">Comédia</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'genre', 'Horror')">Terror</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'genre', 'Sci-Fi')">Sci-Fi</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'genre', 'Mystery')">Mistério</button>
+                            </div>
+                        </div>
+                        
+                        <div class="pref-group">
+                            <h3>Vibe</h3>
+                            <div class="filter-chips" id="style-chips">
+                                <button class="filter-chip" onclick="toggleChip(this, 'style', 'contemplativo')">🧘 Contemplativo</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'style', 'autoral')">🎨 Autoral</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'style', 'internacional')">🌍 Internacional</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'style', 'hipnotico')">🌀 Hipnótico</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'style', 'intenso')">🔥 Intenso</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'style', 'emocional')">💔 Emocional</button>
+                            </div>
+                        </div>
+                        
+                        <div class="pref-group">
+                            <h3>Década</h3>
+                            <div class="filter-chips" id="decade-chips">
+                                <button class="filter-chip" onclick="toggleChip(this, 'decade', '1980')">80s</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'decade', '1990')">90s</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'decade', '2000')">00s</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'decade', '2010')">10s</button>
+                                <button class="filter-chip" onclick="toggleChip(this, 'decade', '2020')">20s</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barra de Ações -->
+                <div class="discover-actions">
+                    <div class="selected-mood" id="selected-mood-display">
+                        <span>Mood selecionado: </span>
+                        <strong id="mood-label-display">Nenhum</strong>
+                    </div>
+                    <div class="discover-buttons">
+                        <button class="btn btn-outline" onclick="clearDiscoverFilters()">Limpar</button>
+                        <button class="btn btn-secondary" onclick="getRandomPick()">🎲 Surpreenda-me!</button>
+                        <button class="btn btn-primary btn-lg" onclick="getRecommendations()" id="btn-discover">
+                            ✨ Descobrir Filmes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultados -->
+            <div id="recommendations-container" class="hidden">
+                <div class="results-header">
+                    <h2>Encontramos para você</h2>
+                    <p id="results-count">0 filmes</p>
+                </div>
+                <div class="discover-results-grid" id="movies-grid"></div>
+            </div>
+
+        </section>
+
+        <!-- PÁGINA MINHA CURADORIA -->
+        <section id="curadoria" class="page hidden">
+
+            <div class="curadoria-content">
+                <!-- Identidade Cinematográfica -->
+                <div class="curadoria-identity" id="curadoria-identity"></div>
+
+                <!-- Estatísticas Rápidas -->
+                <div class="curadoria-stats" id="curadoria-stats"></div>
+
+                <!-- Formulário de Avaliação -->
+                <div class="curadoria-review-form">
+                    <h3>Avaliar um filme</h3>
+                    
+                    <div class="review-form-group">
+                        <label class="review-form-label">Selecione o filme</label>
+                        <button class="review-select-movie" id="curadoria-select-movie" onclick="openSelectMovieCuradoria()">
+                            <span class="select-movie-icon">🎬</span>
+                            <span class="select-movie-text" id="curadoria-movie-text">Clique para selecionar...</span>
+                        </button>
+                    </div>
+                    
+                    <div class="review-form-group">
+                        <label class="review-form-label">Sua avaliação</label>
+                        <div class="review-stars-input" id="curadoria-stars">
+                            <span class="star-input" data-rating="1" onclick="setCuradoriaRating(1)">☆</span>
+                            <span class="star-input" data-rating="2" onclick="setCuradoriaRating(2)">☆</span>
+                            <span class="star-input" data-rating="3" onclick="setCuradoriaRating(3)">☆</span>
+                            <span class="star-input" data-rating="4" onclick="setCuradoriaRating(4)">☆</span>
+                            <span class="star-input" data-rating="5" onclick="setCuradoriaRating(5)">☆</span>
+                        </div>
+                    </div>
+                    
+                    <div class="review-form-group">
+                        <label class="review-form-label">Seu comentário</label>
+                        <textarea id="curadoria-review-text" class="review-textarea" placeholder="O que você achou do filme?"></textarea>
+                    </div>
+                    
+                    <div class="review-form-footer">
+                        <div class="review-attachments">
+                            <button class="attachment-btn" onclick="openPhotoUpload()" title="Anexar foto">
+                                📷
+                            </button>
+                            <button class="attachment-btn" onclick="openVideoUploadModal()" title="Anexar vídeo">
+                                🎥
+                            </button>
+                        </div>
+                        <button class="review-submit-btn" onclick="submitCuradoriaReview()">Publicar Avaliação</button>
+                    </div>
+                </div>
+
+                <!-- Filmes Assistidos -->
+                <section class="curadoria-section">
+                    <div class="curadoria-section-header">
+                        <h2>Filmes Assistidos</h2>
+                        <span class="curadoria-count" id="watched-count">0 filmes</span>
+                    </div>
+                    <div class="curadoria-grid" id="curadoria-watched"></div>
+                </section>
+
+                <!-- Minhas Resenhas -->
+                <section class="curadoria-section">
+                    <div class="curadoria-section-header">
+                        <h2>Minhas Resenhas</h2>
+                        <span class="curadoria-count" id="reviews-made-count">0 resenhas</span>
+                    </div>
+                    <div class="curadoria-reviews" id="curadoria-reviews"></div>
+                </section>
+
+                <!-- Filmes Indicados -->
+                <section class="curadoria-section">
+                    <div class="curadoria-section-header">
+                        <h2>Filmes que Indico</h2>
+                        <span class="curadoria-count" id="recommended-count">0 indicações</span>
+                    </div>
+                    <div class="curadoria-grid" id="curadoria-recommended"></div>
+                </section>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal de Avaliação Rápida -->
+    <div class="quick-rate-overlay" id="quick-rate-overlay" onclick="closeQuickRate()" aria-hidden="true"></div>
+    <div class="quick-rate-modal" id="quick-rate-modal" role="dialog" aria-modal="true" aria-labelledby="quick-rate-title">
+        <button class="modal-close" onclick="closeQuickRate()" aria-label="Fechar modal">✕</button>
+        <h2 id="quick-rate-title"></h2>
+        <p id="quick-rate-year" class="modal-subtitle"></p>
+        <div class="form-group">
+            <label id="quick-rate-label">Sua Avaliação</label>
+            <div class="rating" id="quick-rate-stars" role="group" aria-labelledby="quick-rate-label"></div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-primary" onclick="saveQuickRate()">Salvar</button>
+            <button class="btn btn-secondary" onclick="closeQuickRate()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Review Completo -->
+    <div id="review-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-movie-title">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()" aria-label="Fechar modal">✕</button>
+            <h2 id="modal-movie-title"></h2>
+            <p id="modal-movie-year" class="modal-subtitle"></p>
+            <p id="modal-movie-description" class="modal-description"></p>
+            <div class="form-group">
+                <label id="modal-rating-label">Sua Avaliação</label>
+                <div class="rating" id="modal-rating" role="group" aria-labelledby="modal-rating-label"></div>
+            </div>
+            <div class="form-group">
+                <label for="modal-comment">Comentário (opcional)</label>
+                <textarea id="modal-comment" placeholder="O que você achou?" rows="3"></textarea>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="saveReview()">Salvar Avaliação</button>
+        </div>
+    </div>
+
+
+    <!-- Modal de Avatar -->
+    <div id="avatar-modal" class="modal" role="dialog" aria-modal="true" onclick="if(event.target === this) closeAvatarModal();">
+        <div class="modal-content avatar-modal-content">
+            <button class="modal-close" onclick="closeAvatarModal()" aria-label="Fechar">✕</button>
+            <h2>Escolha seu Avatar</h2>
+            <div class="avatar-options" id="avatar-options"></div>
+            <div class="form-group">
+                <label for="custom-avatar-url">Ou cole a URL de uma imagem</label>
+                <input type="url" id="custom-avatar-url" placeholder="https://exemplo.com/sua-foto.jpg">
+            </div>
+            <button class="btn btn-primary btn-full" onclick="saveAvatar()">Salvar Avatar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Editar Perfil -->
+    <div id="edit-profile-modal" class="modal" role="dialog" aria-modal="true" onclick="if(event.target === this) closeEditProfileModal();">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeEditProfileModal()" aria-label="Fechar">✕</button>
+            <h2>Editar Perfil</h2>
+            <div class="form-group">
+                <label for="edit-profile-name">Nome</label>
+                <input type="text" id="edit-profile-name" placeholder="Seu nome">
+            </div>
+            <div class="form-group">
+                <label for="edit-profile-bio">Bio</label>
+                <textarea id="edit-profile-bio" placeholder="Conte sobre você e seus gostos..." rows="3"></textarea>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="saveProfile()">Salvar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Player de Vídeo -->
+    <div id="video-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="video-modal-title" onclick="if(event.target === this) closeVideoModal();">
+        <div class="video-modal-content">
+            <button class="modal-close" onclick="closeVideoModal()" aria-label="Fechar player">✕</button>
+            <h2 id="video-modal-title"></h2>
+            <div class="video-container" id="video-container"></div>
+            <div class="video-info">
+                <p id="video-description"></p>
+                <div class="video-actions">
+                    <button class="btn btn-primary" onclick="addToWatchlist()" id="btn-add-list">
+                        <span>+</span> Minha Lista
+                    </button>
+                    <button class="btn btn-secondary" onclick="openReviewFromVideo()">
+                        Avaliar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Upload de Resenha em Vídeo -->
+    <div id="video-upload-modal" class="modal" role="dialog" aria-modal="true" onclick="if(event.target === this) closeVideoUploadModal();">
+        <div class="modal-content video-upload-modal-content">
+            <button class="modal-close" onclick="closeVideoUploadModal()" aria-label="Fechar">✕</button>
+            <div class="upload-header">
+                <span class="upload-icon">📹</span>
+                <h2>Enviar Resenha em Vídeo</h2>
+                <p>Compartilhe sua análise cinematográfica com a comunidade</p>
+            </div>
+
+            <div class="upload-form">
+                <!-- Seleção do Filme -->
+                <div class="form-group">
+                    <label for="video-movie-select">Filme da Resenha *</label>
+                    <select id="video-movie-select" class="form-select" required>
+                        <option value="">Selecione um filme...</option>
+                    </select>
+                </div>
+
+                <!-- Upload de Vídeo -->
+                <div class="form-group">
+                    <label>Vídeo da Resenha *</label>
+                    <div class="video-upload-area" id="video-upload-area" onclick="document.getElementById('video-file-input').click()">
+                        <div class="upload-placeholder" id="upload-placeholder">
+                            <span class="upload-placeholder-icon"></span>
+                            <p>Clique para selecionar ou arraste o vídeo</p>
+                            <span class="upload-hint">MP4, WebM ou MOV • Máximo 100MB</span>
+                        </div>
+                        <div class="upload-preview hidden" id="upload-preview">
+                            <video id="video-preview" controls></video>
+                            <button class="btn btn-outline btn-small" onclick="clearVideoUpload(event)">Remover</button>
+                        </div>
+                    </div>
+                    <input type="file" id="video-file-input" accept="video/*" hidden onchange="handleVideoSelect(event)">
+                </div>
+
+                <!-- OU Link do YouTube -->
+                <div class="upload-divider">
+                    <span>ou</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="youtube-link">Link do YouTube</label>
+                    <input type="url" id="youtube-link" placeholder="https://youtube.com/watch?v=..." onchange="handleYouTubeLink(event)">
+                    <span class="input-hint">Cole o link de uma resenha que você já publicou no YouTube</span>
+                </div>
+
+                <!-- Título -->
+                <div class="form-group">
+                    <label for="video-title">Título da Resenha *</label>
+                    <input type="text" id="video-title" placeholder="Ex: Por que Columbus é uma obra-prima subestimada">
+                </div>
+
+                <!-- Descrição -->
+                <div class="form-group">
+                    <label for="video-description">Descrição</label>
+                    <textarea id="video-description-input" rows="3" placeholder="Conte um pouco sobre sua resenha..."></textarea>
+                </div>
+
+                <!-- Tags -->
+                <div class="form-group">
+                    <label>Tags</label>
+                    <div class="video-tags">
+                        <button type="button" class="tag-btn" onclick="toggleVideoTag(this, 'sem-spoiler')">Sem Spoilers</button>
+                        <button type="button" class="tag-btn" onclick="toggleVideoTag(this, 'analise')">Análise</button>
+                        <button type="button" class="tag-btn" onclick="toggleVideoTag(this, 'opiniao')">Opinião</button>
+                        <button type="button" class="tag-btn" onclick="toggleVideoTag(this, 'curiosidades')">Curiosidades</button>
+                        <button type="button" class="tag-btn" onclick="toggleVideoTag(this, 'comparacao')">Comparação</button>
+                    </div>
+                </div>
+
+                <!-- Sua Nota -->
+                <div class="form-group">
+                    <label>Sua Nota para o Filme</label>
+                    <div class="rating-selector" id="video-rating-selector">
+                        <button type="button" class="rating-star" onclick="setVideoRating(1)">☆</button>
+                        <button type="button" class="rating-star" onclick="setVideoRating(2)">☆</button>
+                        <button type="button" class="rating-star" onclick="setVideoRating(3)">☆</button>
+                        <button type="button" class="rating-star" onclick="setVideoRating(4)">☆</button>
+                        <button type="button" class="rating-star" onclick="setVideoRating(5)">☆</button>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-full btn-lg" onclick="submitVideoReview()">
+                    🚀 Publicar Resenha
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Player de Resenha -->
+    <div id="review-player-modal" class="modal" role="dialog" aria-modal="true" onclick="if(event.target === this) closeReviewPlayer();">
+        <div class="review-player-content">
+            <button class="modal-close" onclick="closeReviewPlayer()" aria-label="Fechar">✕</button>
+            
+            <!-- Player de Vídeo -->
+            <div class="review-player-video" id="review-player-video"></div>
+            
+            <!-- Informações da Resenha -->
+            <div class="review-player-info">
+                <div class="review-player-header">
+                    <div class="review-player-author">
+                        <div class="author-avatar" id="review-author-avatar"></div>
+                        <div class="author-details">
+                            <span class="author-name" id="review-author-name"></span>
+                            <span class="review-date" id="review-date"></span>
+                        </div>
+                    </div>
+                    <div class="review-player-stats">
+                        <span class="stat-item"><span id="review-views">0</span> views</span>
+                        <span class="stat-item"><span id="review-likes">0</span> likes</span>
+                    </div>
+                </div>
+                
+                <h2 class="review-player-title" id="review-player-title"></h2>
+                <p class="review-player-movie">Filme: <strong id="review-movie-name"></strong></p>
+                <p class="review-player-desc" id="review-player-desc"></p>
+                
+                <div class="review-player-tags" id="review-player-tags"></div>
+                
+                <div class="review-player-actions">
+                    <button class="action-btn" onclick="likeReview()">
+                        <span id="like-icon">🤍</span> Curtir
+                    </button>
+                    <button class="action-btn" onclick="shareReview()">
+                        📤 Compartilhar
+                    </button>
+                    <button class="action-btn" onclick="watchMovieFromReview()">
+                        Ver Filme
+                    </button>
+                </div>
+                
+                <!-- Comentários -->
+                <div class="review-comments-section">
+                    <h3>💬 Comentários <span id="comments-count">(0)</span></h3>
+                    <div class="add-comment">
+                        <input type="text" id="comment-input" placeholder="Adicione um comentário...">
+                        <button class="btn btn-primary btn-small" onclick="addComment()">Enviar</button>
+                    </div>
+                    <div class="comments-list" id="comments-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rodapé (estilo Netflix) -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <ul class="footer-links">
+                <li><a href="#">FAQ</a></li>
+                <li><a href="#">Central de Ajuda</a></li>
+                <li><a href="#">Termos de Uso</a></li>
+                <li><a href="#">Privacidade</a></li>
+                <li><a href="#">Preferências de Cookies</a></li>
+                <li><a href="#">Informações Corporativas</a></li>
+            </ul>
+            <p class="footer-copyright">ReelFeel &copy; 2024 - Projeto de Imersão Front-end e IA</p>
+        </div>
+    </footer>
+
+    <script src="movies.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
